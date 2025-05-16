@@ -1,3 +1,7 @@
 from django.contrib import admin
+from .models import TextContent, ImageContent, VideoContent, FileContent
 
-# Register your models here.
+admin.site.register(FileContent)
+admin.site.register(TextContent)
+admin.site.register(ImageContent)
+admin.site.register(VideoContent)
