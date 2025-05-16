@@ -1,0 +1,32 @@
+<aside class="w-64 bg-gray-800 text-white p-6 space-y-6 flex-shrink-0">
+    <h2 class="text-xl font-semibold mb-4">Navigation</h2>
+    <nav>
+        <ul class="space-y-2">
+            {% if user.is_authenticated %}
+                <li>
+                    <a href="{% url 'users:dashboard' %}" class="block py-2 px-4 rounded transition duration-200 hover:bg-gray-700">
+                        Dashboard
+                    </a>
+                </li>
+                 <li>
+                    <a href="{% url 'courses:course_list' %}" class="block py-2 px-4 rounded transition duration-200 hover:bg-gray-700">
+                        All Courses
+                    </a>
+                </li>
+                
+                <li><a href="{% url 'users:my_courses' %}" class="block py-2 px-4 rounded transition duration-200 hover:bg-gray-700">My Courses</a></li>
+            {% else %}
+                 <li>
+                    <a href="{% url 'users:signin' %}" class="block py-2 px-4 rounded transition duration-200 hover:bg-gray-700">
+                        Sign In
+                    </a>
+                </li>
+                 <li>
+                    <a href="{% url 'users:signup' %}" class="block py-2 px-4 rounded transition duration-200 hover:bg-gray-700">
+                        Sign Up
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</aside>

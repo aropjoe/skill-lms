@@ -1,0 +1,16 @@
+{% load static %}
+<nav class="bg-blue-600 p-4 shadow-md">
+    <div class="container mx-auto flex justify-between items-center">
+        <a href="{% url 'users:dashboard' %}" class="text-white text-2xl font-bold"><img class="h-8" src="{% static 'img/logo.png' %}"></a>
+
+        <div class="flex items-center space-x-4">
+            {% if user.is_authenticated %}
+                <span class="text-white">Welcome, {{ user.username }}!</span>
+                <a href="{% url 'users:signout' %}" class="bg-white text-blue-600 px-3 py-1 rounded-md hover:bg-gray-200">Sign Out</a>
+            {% else %}
+                <a href="{% url 'users:signin' %}" class="text-white hover:underline">Sign In</a>
+                <a href="{% url 'users:signup' %}" class="bg-white text-blue-600 px-3 py-1 rounded-md hover:bg-gray-200">Sign Up</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>

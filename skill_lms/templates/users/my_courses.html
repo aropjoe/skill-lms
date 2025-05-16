@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}My Courses - Skill-LMS{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-gray-800 mb-6">My Enrolled Courses</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    {% for course in enrolled_courses %}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            {% if course.image %}
+                <img src="{{ course.image.url }}" alt="{{ course.title }} thumbnail" class="w-full h-48 object-cover">
+            {% else %}
+                <div class="w-full h-48 bg-gray-300 flex items-center justify-center text-gray-600">
+                    No Image Available
+                </div>
+            {% endif %}
+
+            <div class="p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-2">{{ course.title }}</h2>
+                <p class="text-gray-600 text-sm mb-4">{{ course.description|truncatechars:150 }}</p>
+                <a href="{% url 'courses:course_detail' course.slug %}" class="text-blue-600 hover:underline font-medium">
+                    Continue Course →
+                </a>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-span-full text-center text-gray-600">
+            You are not currently enrolled in any courses.
+            <br>
+            Browse our <a href="{% url 'courses:course_list' %}" class="text-blue-600 hover:underline">All Courses</a> page to find something to learn!
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
