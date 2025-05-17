@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,9 +11,9 @@
 <body class="bg-gray-100 font-sans leading-normal tracking-normal flex items-center justify-center min-h-screen">
 
     <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
-        <div class="items-center mb-3"><img class="h-8" src="{% static 'img/logo.png' %}"></div>
+        <div class="flex mb-3"><img class="mx-auto h-8" src="{% static 'img/logo.png' %}"></div>
 
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Create an Account</h1>
+        <h1 class="text-xl font-bold text-center text-gray-800 mb-6">Create an Account</h1>
 
         {% if error %}
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6" role="alert">
