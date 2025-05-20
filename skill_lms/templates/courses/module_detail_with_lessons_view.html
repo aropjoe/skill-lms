@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ module.title }} - Lessons - Skill-LMS{% endblock %}
+
+{% block extra_head %}
+    <style>
+        /* Basic responsive embed for videos */
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            background: #000;
+            border-radius: 0.5rem; /* Match Tailwind rounded-lg */
+        }
+        .video-container iframe,
+        .video-container object,
+        .video-container embed {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+         /* Style for images with lazy loading */
+        img[loading="lazy"] {
+            /* Optional: Add a background or spinner while loading */
+            background-color: #e2e8f0; /* Tailwind gray-300 */
+            min-height: 50px; /* Prevent layout shifts with a minimum height */
+        }
+        /* Style for active tab button */
+        .tab-button[aria-selected="true"] {
+            background-color: #4f46e5; /* Tailwind indigo-600 */
+            color: white;
+        }
+         /* Style for inactive tab button */
+        .tab-button[aria-selected="false"] {
+            color: #4b5563; /* Tailwind gray-700 */
+        }
+         .tab-button[aria-selected="false"]:hover {
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-2 text-gray-800">{{ module.title }}</h1>
+    {% comment %} Link back to the course detail page {% endcomment %}
+    <p class="text-gray-600 mb-6">Part of: <a href="{% url 'courses:course_detail' module.course.slug %}" class="text-blue-600 hover:underline">{{ module.course.title }}</a></p>
+
+
+    <div class="flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-6">
+        <div class="md:w-1/4 flex-shrink-0"> {# flex-shrink-0 prevents sidebar from shrinking #}
+            <div role="tablist" class="flex flex-col bg-white shadow rounded-lg p-4">
+                {% comment %} Loop through lessons data passed from the view {% endcomment %}
+                {% for lesson_data in lessons_data %}
+                    <button
+                        role="tab"
+                        id="tab-{{ lesson_data.lesson_obj.id }}"
+                        aria-controls="panel-{{ lesson_data.lesson_obj.id }}"
+                        {% if forloop.first %}aria-selected="true"{% else %}aria-selected="false" tabindex="-1"{% endif %}
+                        class="tab-button py-3 px-4 text-left rounded-md transition-colors duration-200 mb-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+                        data-lesson-id="{{ lesson_data.lesson_obj.id }}"
+                    >
+                        Lesson {{ lesson_data.lesson_obj.order }}: {{ lesson_data.lesson_obj.title }}
+                    </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="md:w-3/4 bg-white shadow rounded-lg p-6">
+            {% comment %} Loop through lessons data again to create content panels {% endcomment %}
+            {% for lesson_data in lessons_data %}
+                <div
+                    role="tabpanel"
+                    id="panel-{{ lesson_data.lesson_obj.id }}"
+                    aria-labelledby="tab-{{ lesson_data.lesson_obj.id }}"
+                    {% if forloop.first %}class="tab-content block"{% else %}class="tab-content hidden"{% endif %}
+                >
+                    <h2 class="text-2xl font-semibold mb-4 text-gray-700">{{ lesson_data.lesson_obj.title }}</h2>
+                    <div class="prose max-w-none"> {# Tailwind prose for better typography #}
+                        {% comment %} Loop through the combined and sorted content for this lesson {% endcomment %}
+                        {% for content_block in lesson_data.contents %}
+                             <div class="mb-6 p-4 border-b border-gray-200 last:border-b-0">
+                                {% comment %}
+                                    Check the type of content block by looking for unique attributes
+                                    of each model instance, similar to lesson_detail.html.
+                                {% endcomment %}
+
+                                {% if content_block.body is not None %}
+                                    {% comment %} This is TextContent (check for 'body' field) {% endcomment %}
+                                    <div class="text-gray-800">
+                                        {{ content_block.body|linebreaksbr }}
+                                    </div>
+                                {% elif content_block.image %}
+                                    {% comment %} This is ImageContent (check for 'image' field) {% endcomment %}
+                                    <div class="flex flex-col items-center">
+                                        {% comment %} Apply lazy loading {% endcomment %}
+                                        <img src="{{ content_block.image.url }}" alt="{{ content_block.caption|default:'Lesson Image' }}"
+                                             class="max-w-full h-auto rounded-lg shadow-md" loading="lazy">
+                                        {% if content_block.caption %}
+                                            <p class="text-sm text-gray-600 mt-2">{{ content_block.caption }}</p>
+                                        {% endif %}
+                                    </div>
+                                {% elif content_block.video_url or content_block.video_file %}
+                                    {% comment %} This is VideoContent (check for either video_url or video_file) {% endcomment %}
+                                    <div class="video-container mb-4">
+                                        {% if content_block.video_file %}
+                                            <video controls class="w-full h-auto rounded-lg shadow-sm">
+                                                <source src="{{ content_block.video_file.url }}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        {% elif content_block.video_url %}
+                                            {# Embed YouTube/Vimeo video using an iframe #}
+                                            <div class="relative" style="padding-bottom: 56.25%; height: 0; overflow: hidden;">
+                                                <iframe class="absolute top-0 left-0 w-full h-full"
+                                                    src="{{ content_block.video_url|add:'?autoplay=0&controls=1' }}"
+                                                    frameborder="0" allowfullscreen>
+                                                </iframe>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    {% if content_block.caption %}
+                                        <p class="text-sm text-gray-600 mt-2">{{ content_block.caption }}</p>
+                                    {% endif %}
+                                {% elif content_block.file %}
+                                     {% comment %} This is FileContent (check for 'file' field) {% endcomment %}
+                                     <div class="flex items-center space-x-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l3-3m-3 3l-3-3m2.879-8.879A3 3 0 1115.83 6H3a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-1.061l-1.172-1.172a4 4 0 00-5.656 0z" />
+                                        </svg>
+                                        <a href="{{ content_block.file.url }}" class="text-blue-600 hover:underline font-medium" download>
+                                            {{ content_block.title|default:content_block.file.name }}
+                                        </a>
+                                    </div>
+                                {% else %}
+                                    {% comment %} Fallback for unknown content types {% endcomment %}
+                                    <p class="text-red-500">Unknown content type.</p>
+                                {% endif %}
+                            </div>
+                        {% empty %}
+                            <p class="text-gray-600 italic">No content available for this lesson yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% empty %}
+                 <div class="text-center text-gray-600">
+                    No lessons available for this module yet.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Function to activate a specific tab
+        const activateTab = (button) => {
+             const lessonId = button.dataset.lessonId;
+
+            // Deactivate all buttons
+            tabButtons.forEach(btn => {
+                btn.setAttribute('aria-selected', 'false');
+                btn.setAttribute('tabindex', '-1');
+                btn.classList.remove('bg-indigo-600', 'text-white'); // Use indigo-600 for active state
+                btn.classList.add('text-gray-700', 'hover:bg-gray-100');
+            });
+
+            // Hide all tab contents
+            tabContents.forEach(content => {
+                content.classList.add('hidden');
+                content.classList.remove('block');
+            });
+
+            // Activate the clicked button
+            button.setAttribute('aria-selected', 'true');
+            button.setAttribute('tabindex', '0');
+            button.classList.remove('text-gray-700', 'hover:bg-gray-100');
+            button.classList.add('bg-indigo-600', 'text-white'); // Use indigo-600 for active state
+
+            // Show the corresponding tab content
+            const targetContent = document.getElementById(`panel-${lessonId}`);
+            if (targetContent) {
+                targetContent.classList.remove('hidden');
+                targetContent.classList.add('block');
+            }
+        };
+
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                activateTab(button);
+            });
+        });
+
+        // Activate the first tab on load if no specific tab is indicated (e.g., via URL hash)
+        const firstActiveButton = document.querySelector('.tab-button[aria-selected="true"]');
+        if (!firstActiveButton) {
+            const firstButton = document.querySelector('.tab-button');
+            if (firstButton) {
+                activateTab(firstButton); // Simulate click on the first button
+            }
+        } else {
+             // If a tab is marked active by Django (e.g., the first one), ensure its content is shown
+             const initialLessonId = firstActiveButton.dataset.lessonId;
+             const initialContent = document.getElementById(`panel-${initialLessonId}`);
+             if (initialContent) {
+                 initialContent.classList.remove('hidden');
+                 initialContent.classList.add('block');
+             }
+        }
+
+         // Optional: Handle deep linking to a specific lesson tab via URL hash (e.g., #lesson-5)
+        if (window.location.hash) {
+            const targetLessonSlug = window.location.hash.substring(1); // Remove the '#'
+            // Find the button corresponding to the lesson slug (you might need to add slug as data attribute)
+            // Or, if using lesson ID in hash (e.g., #panel-123), find the panel and then its button
+            const targetPanel = document.getElementById(targetLessonSlug); // Assuming hash matches panel ID
+            if (targetPanel) {
+                 const targetButtonId = targetPanel.getAttribute('aria-labelledby');
+                 const targetButton = document.getElementById(targetButtonId);
+                 if (targetButton) {
+                     activateTab(targetButton);
+                     // Optional: Scroll to the top of the content area after switching tab
+                      targetPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                 }
+            }
+        }
+    });
+</script>
+{% endblock %}
+
+{% endblock content %}
