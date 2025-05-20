@@ -34,6 +34,12 @@ class ImageContent(models.Model):
         upload_to='lesson_images/',
         help_text="The image file."
     )
+    optimized_image_webp = models.ImageField(
+        upload_to='lesson_images_optimized/',
+        blank=True,
+        null=True,
+        help_text="The optimized WebP version of the image."
+    )
     caption = models.CharField(
         max_length=255,
         blank=True,
