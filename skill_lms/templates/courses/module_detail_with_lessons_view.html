@@ -96,11 +96,20 @@
                                         {{ content_block.body|linebreaksbr }}
                                     </div>
                                 {% elif content_block.image %}
-                                    {% comment %} This is ImageContent (check for 'image' field) {% endcomment %}
-                                    <div class="flex flex-col items-center">
-                                        {% comment %} Apply lazy loading {% endcomment %}
-                                        <img src="{{ content_block.image.url }}" alt="{{ content_block.caption|default:'Lesson Image' }}"
-                                             class="max-w-full h-auto rounded-lg shadow-md" loading="lazy">
+                                <div class="flex flex-col items-center">
+                                {% if content_block.optimized_image_webp %}
+                                    <picture>
+                                        <source srcset="{{ content_block.optimized_image_webp.url }}" type="image/webp">
+                                        {# Fallback to the original image if WebP is not supported or optimized_image_webp is null #}
+                                        <img src="{{ content_block.image.url }}" alt="{{ content_block.caption }}" loading="lazy">
+                                    </picture>
+                                {% elif content_block.image %}
+                                    {# If no optimized WebP exists, just use the original (potentially unoptimized) image #}
+                                    <img src="{{ content_block.image.url }}" alt="{{ content_block.caption }}" loading="lazy">
+                                {% endif %}
+                                {% if content_block.caption %}
+                                    <p>{{ content_block.caption }}</p>
+                                {% endif %}
                                         {% if content_block.caption %}
                                             <p class="text-sm text-gray-600 mt-2">{{ content_block.caption }}</p>
                                         {% endif %}
