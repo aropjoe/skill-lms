@@ -45,7 +45,18 @@ INSTALLED_APPS = [
     "users",
     "content",
     "courses",
+    'compressor',
+
 ]
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+)
+COMPRESS_JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter']
+COMPRESS_ENABLED = True
+COMPRESS_OFFLINE = True
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -58,6 +69,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+GZIP_MIN_LENGTH = 1000
 
 ROOT_URLCONF = "skill_lms.urls"
 
