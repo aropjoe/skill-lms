@@ -1,3 +1,5 @@
+# courses/management/commands/compress_images.py
+
 import os
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -6,8 +8,9 @@ from pathlib import Path
 from glob import glob
 from django.core.files import File # Import File to assign files to ImageField
 
-# Import your ImageContent model
+# Import your ImageContent and Course models
 from content.models import ImageContent # Adjust 'content.models' to your actual app name for ImageContent
+from courses.models import Course # Adjust 'courses.models' to your actual app name for Course
 
 class Command(BaseCommand):
     help = 'Compresses images in staticfiles and media directories, creating _optimized versions and WebP.'
@@ -39,11 +42,10 @@ class Command(BaseCommand):
             action='store_true',
             help='Only process media files, skip static files.'
         )
-        # New argument to allow re-processing and updating existing optimized fields
         parser.add_argument(
             '--reprocess-media-webp',
             action='store_true',
-            help='Re-processes media images and updates the optimized_image_webp field.'
+            help='Re-processes media images and updates the optimized_image_webp field (for ImageContent and Course).'
         )
 
 
@@ -53,14 +55,14 @@ class Command(BaseCommand):
         no_webp = options['no_webp']
         static_only = options['static_only']
         media_only = options['media_only']
-        reprocess_media_webp = options['reprocess_media_webp'] # New option
+        reprocess_media_webp = options['reprocess_media_webp']
 
         self.stdout.write(f"Starting image compression with quality: {quality}")
 
         if not media_only:
             self.process_static_images(quality, overwrite, no_webp)
         if not static_only:
-            self.process_media_images(quality, overwrite, no_webp, reprocess_media_webp) # Pass new option
+            self.process_media_images(quality, overwrite, no_webp, reprocess_media_webp)
 
         self.stdout.write(self.style.SUCCESS("Image compression complete!"))
 
@@ -77,7 +79,6 @@ class Command(BaseCommand):
             original_suffix = output_path_prefix.suffix
 
             # 1. Save optimized original format (JPEG/PNG)
-            # This is primarily for the _optimized.jpg/_optimized.png variants if not overwriting.
             if original_suffix.lower() in ['.jpg', '.jpeg']:
                 output_path_original_fmt = output_path_prefix.with_name(f"{original_stem}_optimized.jpg")
                 img.save(output_path_original_fmt, 'jpeg', quality=quality, optimize=True)
@@ -90,7 +91,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"  -> Saved optimized PNG: {output_path_original_fmt.name}")
             else:
                 self.stdout.write(f"  -> Skipping optimization for unsupported format: {input_path.name}")
-                return [] # Don't process unknown formats as optimized original
+                return []
 
             # 2. Save WebP version
             if not no_webp:
@@ -139,23 +140,12 @@ class Command(BaseCommand):
             for img_path in found_images:
                 self.stdout.write(f"Processing static image: {img_path.relative_to(static_path)}")
 
-                # Determine the base name for output files (e.g., 'image.jpg' -> 'image')
-                # If overwriting, the output prefix is the original path itself.
-                # Otherwise, it's used to derive _optimized names.
-                output_prefix_for_compression = img_path
-                if overwrite:
-                    # When overwriting, we only save the final chosen format (e.g., WebP or optimized original)
-                    # and then rename it. So we don't need the _optimized suffix during creation.
-                    pass # Handled by specific overwriting logic below
-
-                generated_files = self.compress_image(img_path, output_prefix_for_compression, quality, no_webp)
+                generated_files = self.compress_image(img_path, img_path, quality, no_webp)
 
                 if overwrite and generated_files:
-                    # Prioritize WebP for overwrite if generated and allowed
                     if not no_webp and any(p.suffix.lower() == '.webp' for p in generated_files):
                         webp_path = next(p for p in generated_files if p.suffix.lower() == '.webp')
                         self.replace_original(img_path, webp_path)
-                    # Fallback to optimized original format if no WebP or WebP skipped
                     elif any(p.suffix.lower() in ['.jpg', '.jpeg', '.png'] for p in generated_files):
                         original_fmt_path = next(p for p in generated_files if p.suffix.lower() in ['.jpg', '.jpeg', '.png'])
                         self.replace_original(img_path, original_fmt_path)
@@ -174,7 +164,8 @@ class Command(BaseCommand):
             self.stderr.write(self.style.ERROR(f"MEDIA_ROOT directory not found: {media_root_path}. Skipping media image processing."))
             return
 
-        # Iterate through ImageContent instances
+        # --- Process ImageContent instances ---
+        self.stdout.write(self.style.HTTP_INFO("\n  Processing ImageContent instances:"))
         for image_content in ImageContent.objects.all():
             if not image_content.image:
                 continue
@@ -182,50 +173,80 @@ class Command(BaseCommand):
             original_file_path = Path(image_content.image.path)
 
             if not original_file_path.exists():
-                self.stderr.write(self.style.ERROR(f"Media file not found at path: {original_file_path}. Skipping."))
+                self.stderr.write(self.style.ERROR(f"    Media file not found at path: {original_file_path}. Skipping."))
                 continue
 
-            # Skip if optimized_image_webp already exists and reprocess_media_webp is False
             if image_content.optimized_image_webp and not reprocess_media_webp:
-                self.stdout.write(f"  Skipping '{original_file_path.name}': optimized WebP already exists and --reprocess-media-webp not used.")
+                self.stdout.write(f"    Skipping '{original_file_path.name}': optimized WebP already exists and --reprocess-media-webp not used.")
                 continue
 
-            self.stdout.write(f"Processing media image: {original_file_path.relative_to(media_root_path)}")
+            self.stdout.write(f"    Processing ImageContent: {original_file_path.relative_to(media_root_path)}")
 
-            # Pass the original file path as prefix for creating _optimized files next to it
             generated_files = self.compress_image(original_file_path, original_file_path, quality, no_webp)
 
-            # Update the model instance if WebP was generated
+            if not no_webp:
+                webp_output_path = original_file_path.with_name(f"{original_file_path.stem}_optimized.webp")
+                if webp_output_path.exists():
+                    try:
+                        with open(webp_output_path, 'rb') as f:
+                            image_content.optimized_image_webp.save(webp_output_path.name, File(f), save=False)
+                        image_content.save(update_fields=['optimized_image_webp'])
+                        self.stdout.write(f"    -> Updated ImageContent for {original_file_path.name} to point to {image_content.optimized_image_webp.name}")
+                    except Exception as e:
+                        self.stderr.write(self.style.ERROR(f"    Error updating ImageContent model for {original_file_path.name}: {e}"))
+                else:
+                    self.stderr.write(self.style.ERROR(f"    Optimized WebP file not found for ImageContent model update: {webp_output_path.name}"))
+
+            if overwrite and generated_files:
+                if not no_webp and any(p.suffix.lower() == '.webp' for p in generated_files):
+                    webp_path_to_overwrite = next(p for p in generated_files if p.suffix.lower() == '.webp')
+                    self.replace_original(original_file_path, webp_path_to_overwrite)
+                elif any(p.suffix.lower() in ['.jpg', '.jpeg', '.png'] for p in generated_files):
+                    original_fmt_path = next(p for p in generated_files if p.suffix.lower() in ['.jpg', '.jpeg', '.png'])
+                    self.replace_original(original_file_path, original_fmt_path)
+                else:
+                    self.stderr.write(self.style.ERROR(f"    No suitable optimized file to overwrite {original_file_path.name} with."))
+
+        # --- Process Course instances ---
+        self.stdout.write(self.style.HTTP_INFO("\n  Processing Course instances:"))
+        for course in Course.objects.all():
+            if not course.image:
+                continue
+
+            original_file_path = Path(course.image.path)
+
+            if not original_file_path.exists():
+                self.stderr.write(self.style.ERROR(f"    Media file not found at path: {original_file_path}. Skipping."))
+                continue
+
+            if course.optimized_image_webp and not reprocess_media_webp:
+                self.stdout.write(f"    Skipping '{original_file_path.name}': optimized WebP already exists for Course and --reprocess-media-webp not used.")
+                continue
+
+            self.stdout.write(f"    Processing Course image: {original_file_path.relative_to(media_root_path)}")
+
+            generated_files = self.compress_image(original_file_path, original_file_path, quality, no_webp)
+
             if not no_webp:
                 webp_output_path = original_file_path.with_name(f"{original_file_path.stem}_optimized.webp")
                 if webp_output_path.exists():
                     try:
                         # Use File() to assign the file to the ImageField
-                        # This handles copying/moving the file into the correct MEDIA_ROOT subdirectory
-                        # as defined by `upload_to='lesson_images_optimized/'` in the model.
                         with open(webp_output_path, 'rb') as f:
-                            image_content.optimized_image_webp.save(webp_output_path.name, File(f), save=False)
-                            # You can optionally delete the temporary _optimized.webp file after saving it to the model field's path
-                            # webp_output_path.unlink(missing_ok=True)
-                        image_content.save(update_fields=['optimized_image_webp']) # Save only this field
-                        self.stdout.write(f"  -> Updated ImageContent for {original_file_path.name} to point to {image_content.optimized_image_webp.name}")
+                            course.optimized_image_webp.save(webp_output_path.name, File(f), save=False)
+                        course.save(update_fields=['optimized_image_webp'])
+                        self.stdout.write(f"    -> Updated Course for {original_file_path.name} to point to {course.optimized_image_webp.name}")
                     except Exception as e:
-                        self.stderr.write(self.style.ERROR(f"Error updating model for {original_file_path.name}: {e}"))
+                        self.stderr.write(self.style.ERROR(f"    Error updating Course model for {original_file_path.name}: {e}"))
                 else:
-                    self.stderr.write(self.style.ERROR(f"Optimized WebP file not found for model update: {webp_output_path.name}"))
+                    self.stderr.write(self.style.ERROR(f"    Optimized WebP file not found for Course model update: {webp_output_path.name}"))
 
-            # Handle overwrite for the original field, if requested.
-            # This is separate from updating `optimized_image_webp`
             if overwrite and generated_files:
                 if not no_webp and any(p.suffix.lower() == '.webp' for p in generated_files):
                     webp_path_to_overwrite = next(p for p in generated_files if p.suffix.lower() == '.webp')
                     self.replace_original(original_file_path, webp_path_to_overwrite)
-                    # If original is overwritten with WebP, you might also want to update the `image` field
-                    # to point to the new WebP, but this is more complex due to Django's FileField internal naming.
-                    # For simplicity, if you overwrite, the original field path remains the same, but the content is WebP.
-                    # This is why it's usually better to use a dedicated field like `optimized_image_webp`.
                 elif any(p.suffix.lower() in ['.jpg', '.jpeg', '.png'] for p in generated_files):
                     original_fmt_path = next(p for p in generated_files if p.suffix.lower() in ['.jpg', '.jpeg', '.png'])
                     self.replace_original(original_file_path, original_fmt_path)
                 else:
-                    self.stderr.write(self.style.ERROR(f"No suitable optimized file to overwrite {original_file_path.name} with."))
+                    self.stderr.write(self.style.ERROR(f"    No suitable optimized file to overwrite {original_file_path.name} with."))

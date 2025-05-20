@@ -10,13 +10,18 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {% for course in courses %}
                 <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    {% if course.image %}
-                        <img src="{{ course.image.url }}" alt="{{ course.title }} thumbnail" class="w-full h-48 object-cover">
-                    {% else %}
-                        <div class="w-full h-48 bg-gray-300 flex items-center justify-center text-gray-600">
-                            No Image Available
-                        </div>
-                    {% endif %}
+                    {% if course.optimized_image_webp %}
+    <picture>
+        <source srcset="{{ course.optimized_image_webp.url }}" type="image/webp">
+        {# Fallback to the original image if WebP is not supported or optimized_image_webp is null #}
+        <img src="{{ course.image.url }}" alt="{{ course.title }}" loading="lazy">
+    </picture>
+{% elif course.image %}
+    {# If no optimized WebP exists, just use the original (potentially unoptimized) image #}
+    <img src="{{ course.image.url }}" alt="{{ course.title }}" loading="lazy">
+{% endif %}
+
+                  
 
                     <div class="p-6">
                         <h2 class="text-xl font-semibold text-gray-800 mb-2">{{ course.title }}</h2>

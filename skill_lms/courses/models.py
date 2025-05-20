@@ -12,6 +12,12 @@ class Course(models.Model):
         null=True,
         help_text="Thumbnail or banner image for the course."
     )
+    optimized_image_webp = models.ImageField(
+        upload_to='course_images_optimized/', # Store in a different subdirectory
+        blank=True,
+        null=True,
+        help_text="The optimized WebP version of the course image."
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
