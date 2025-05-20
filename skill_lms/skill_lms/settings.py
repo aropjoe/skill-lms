@@ -45,7 +45,19 @@ INSTALLED_APPS = [
     "users",
     "content",
     "courses",
+    "compressor",
 ]
+
+STATICFILES_FINDERS = (
+'django.contrib.staticfiles.finders.FileSystemFinder',
+'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+'compressor.finders.CompressorFinder', # Add this
+)
+COMPRESS_ENABLED = True # Set to True for production/testing
+COMPRESS_JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter'] # Uses Django's default JSMinFilter
+# Or, for more robust minification, you could try:
+# COMPRESS_JS_FILTERS = ['compressor.filters.jsmin.rJSMinFilter'] # Requires 'rjsmin' pip package
+COMPRESS_OFFLINE = True
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
