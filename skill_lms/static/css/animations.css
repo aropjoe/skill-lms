@@ -1,0 +1,72 @@
+/* static/css/animations.css */
+
+/* Fade-in animation for elements */
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Slide-in animation from bottom */
+.slide-in-up {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideInUp 0.7s ease-out forwards;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Spin animation for loading indicators */
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Hover effects for interactive elements */
+.scale-on-hover {
+    transition: transform 0.2s ease-out;
+}
+
+.scale-on-hover:hover {
+    transform: scale(1.02);
+}
+
+.shadow-on-hover {
+    transition: box-shadow 0.3s ease;
+}
+
+.shadow-on-hover:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+/* Simple fade transition for elements that appear/disappear */
+.fade-transition {
+    transition: opacity 0.4s ease-in-out;
+}
+
+.fade-transition.hidden {
+    opacity: 0;
+    pointer-events: none; /* Disable interaction when hidden */
+}

@@ -1,0 +1,140 @@
+/* static/css/components.css */
+
+/* Custom Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    border: none;
+    text-decoration: none;
+    line-height: 1; /* Ensure consistent height */
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-secondary:hover {
+    background-color: var(--secondary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.btn-outline:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+}
+
+/* Card Component */
+.card {
+    background-color: white;
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+    padding: 1.5rem;
+    background-color: var(--background-light);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-color-dark);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-footer {
+    padding: 1.5rem;
+    background-color: var(--background-light);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+/* Alert Messages */
+.alert {
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.alert-info {
+    background-color: #d1e7dd; /* light green */
+    color: #0f5132; /* dark green */
+    border: 1px solid #badbcc;
+}
+
+.alert-warning {
+    background-color: #fff3cd; /* light yellow */
+    color: #664d03; /* dark yellow */
+    border: 1px solid #ffecb5;
+}
+
+.alert-error {
+    background-color: #f8d7da; /* light red */
+    color: #842029; /* dark red */
+    border: 1px solid #f5c2c7;
+}
+
+.alert-success {
+    background-color: #d1e7dd; /* light green */
+    color: #0f5132; /* dark green */
+    border: 1px solid #badbcc;
+}
+
+.alert .icon {
+    margin-right: 0.75rem;
+    font-size: 1.5rem;
+}

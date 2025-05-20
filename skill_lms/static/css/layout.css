@@ -1,0 +1,103 @@
+/* static/css/layout.css */
+
+/* Site Header */
+.site-header {
+    background-color: white;
+    box-shadow: var(--shadow-sm);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 1000; /* Ensure it stays on top */
+}
+
+.site-header .logo {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.site-header .nav-menu ul {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+}
+
+.site-header .nav-menu a {
+    color: var(--text-color-dark);
+    font-weight: 500;
+    padding: 0.5rem 0;
+    position: relative;
+}
+
+.site-header .nav-menu a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+.site-header .nav-menu a:hover::after {
+    width: 100%;
+}
+
+/* Main Content Area */
+.main-content {
+    min-height: calc(100vh - 120px); /* Adjust based on header/footer height */
+    padding: 2rem;
+}
+
+/* Site Footer */
+.site-footer {
+    background-color: var(--text-color-dark);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    font-size: 0.9rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.site-footer a {
+    color: var(--primary-light);
+    text-decoration: none;
+}
+
+.site-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Simple Grid System (can be extended) */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .site-header {
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    .site-header .nav-menu ul {
+        flex-direction: column;
+        margin-top: 1rem;
+        gap: 0.5rem;
+    }
+
+    .main-content {
+        padding: 1rem;
+    }
+}

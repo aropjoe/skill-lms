@@ -25,8 +25,11 @@ SECRET_KEY = "django-insecure-719)h7&+yet9#!e9k#eaq5@gb#%p!^@4fb#k)x-*abf$j$-6-d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'skill-lms.onrender.com']
-
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'skill-lms.onrender.com', 'vigilant-xylophone-75xw7g45vrpcwrj6-8000.app.github.dev']
+CSRF_TRUSTED_ORIGINS = [
+    'https://vigilant-xylophone-75xw7g45vrpcwrj6-8000.app.github.dev',
+    'https://skill-lms.onrender.com',
+]
 
 # Application definition
 
@@ -119,10 +122,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-if not DEBUG:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
