@@ -45,7 +45,18 @@ INSTALLED_APPS = [
     "users",
     "content",
     "courses",
+    'compressor',
 ]
+
+STATICFILES_FINDERS = (
+'django.contrib.staticfiles.finders.FileSystemFinder',
+'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+'compressor.finders.CompressorFinder', # Add this
+)
+COMPRESS_ENABLED = True # Set to True for production/testing
+# COMPRESS_CSS_FILTERS = ['compressor.filters.cssmin.CSSMinFilter'] # Default, can be customized
+# COMPRESS_JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter'] # For JS later
+COMPRESS_OFFLINE = True # Important for deploying with pre-compressed files
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
