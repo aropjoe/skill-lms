@@ -25,11 +25,10 @@ SECRET_KEY = "django-insecure-719)h7&+yet9#!e9k#eaq5@gb#%p!^@4fb#k)x-*abf$j$-6-d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'skill-lms.onrender.com', 'skill-lms-8iss.onrender.com', 'vigilant-xylophone-75xw7g45vrpcwrj6-8000.app.github.dev']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'skill-lms.onrender.com', 'vigilant-xylophone-75xw7g45vrpcwrj6-8000.app.github.dev']
 CSRF_TRUSTED_ORIGINS = [
     'https://vigilant-xylophone-75xw7g45vrpcwrj6-8000.app.github.dev',
     'https://skill-lms.onrender.com',
-    'https://skill-lms-8iss.onrender.com',
 ]
 
 # Application definition
@@ -50,6 +49,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     #'whitenoise.middleware.WhiteNoiseMiddleware',
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.gzip.GZipMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
