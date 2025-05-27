@@ -25,12 +25,13 @@ SECRET_KEY = "django-insecure-719)h7&+yet9#!e9k#eaq5@gb#%p!^@4fb#k)x-*abf$j$-6-d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'skill-lms.onrender.com', 'blindly-causal-skylark.ngrok-free.app', '4040-aropjoe-skilllms-925c7k6i8ho.ws-eu118.gitpod.io', 'tensflare-skilllms-f4tj4khqc69.ws-eu118.gitpod.io', '8000-aropjoe-skilllms-925c7k6i8ho.ws-eu118.gitpod.io', 'vigilant-xylophone-75xw7g45vrpcwrj6-8000.app.github.dev']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'skill-lms.onrender.com', 'skill-lms-8iss.onrender.com', 'blindly-causal-skylark.ngrok-free.app', '4040-aropjoe-skilllms-925c7k6i8ho.ws-eu118.gitpod.io', 'tensflare-skilllms-f4tj4khqc69.ws-eu118.gitpod.io', '8000-aropjoe-skilllms-925c7k6i8ho.ws-eu118.gitpod.io', 'vigilant-xylophone-75xw7g45vrpcwrj6-8000.app.github.dev']
 CSRF_TRUSTED_ORIGINS = [
     'https://vigilant-xylophone-75xw7g45vrpcwrj6-8000.app.github.dev',
     'https://skill-lms.onrender.com',
     'https://8000-aropjoe-skilllms-925c7k6i8ho.ws-eu118.gitpod.io',
     'https://tensflare-skilllms-f4tj4khqc69.ws-eu118.gitpod.io',
+    'https://skill-lms-8iss.onrender.com',
 ]
 
 # Application definition
